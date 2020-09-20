@@ -1,0 +1,7 @@
+__pycache__
+hate_list.txt
+*.log
+venv
+env
+insult.service
+*.pickle
