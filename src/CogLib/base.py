@@ -4,23 +4,18 @@ Setup acts as entry point to add cog to bot.
 """
 
 import logging
+import os
 
 from discord.ext import commands
 
 log = logging.getLogger(__name__)
 
-INFO = """
-Insult your friends with InsultBot! InsultBot creates randomly generated insults
-following a particular formula to creatively insult whatever you want.
-"""
-
-
 class Base(commands.Cog):
     """Basic commands and listeners"""
 
-    def __init__(self, bot, channel):
+    def __init__(self, bot):
         self.bot = bot
-        self.channel = channel
+        # self.channel = channel
         self.ready_state = False
 
     @commands.Cog.listener()
@@ -28,16 +23,14 @@ class Base(commands.Cog):
         """Send message when bot comes online"""
 
         if not self.ready_state:
-            print("InsultBot Online")
-            await self.bot.get_channel(self.channel).send("InsultBot online")
+            log.info("InsultBot Online")
+
+            if os.environ['SYNC_TREE'] == "true":
+                log.info("Syncing command tree...")
+                await self.bot.tree.sync()
+                log.info("Done.")
+
             self.ready_state = True
 
-    @commands.command()
-    async def info(self, ctx):
-        """Displys information"""
-
-        await ctx.send(INFO)
-
-
-def setup(bot, channel):
-    bot.add_cog(Base(bot, channel))
+async def setup(bot):
+    await bot.add_cog(Base(bot))

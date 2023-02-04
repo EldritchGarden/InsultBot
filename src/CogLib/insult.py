@@ -11,9 +11,11 @@ import random
 from pathlib import Path
 import logging
 import re
+from typing import Optional
 
 # External
 from discord.ext import commands
+from discord import app_commands, Interaction
 import inflect
 
 
@@ -29,23 +31,39 @@ class Insult(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(aliases=['insultsfw'])
-    async def insult(self, ctx, *args):
+    @app_commands.command()
+    async def insult(self, ctx: Interaction, subject: Optional[str] = ""):
         """Generate and send an insult.
         """
 
         # If insult bot is mentioned, send middle finger and return
-        if re.search("<@!?548617277000384532", ctx.message.content):
-            await ctx.send("\U0001F595")  # send :middle_finger:
+        if re.search("<@!?548617277000384532", subject):
+            await ctx.response.send_message("\U0001F595")  # send :middle_finger:
             return
 
-        if ctx.invoked_with == 'insultsfw':
-            insult = self._make_insult(args, sfw=True)
-        else:
-            insult = self._make_insult(args)
+        log.info(f'Crafting insult from {ctx.user}{f", with subject: {subject}" if subject else ""}')
 
-        await ctx.message.delete()  # delete original message
-        await ctx.send(insult)
+        insult = self._make_insult(subject)
+
+        # await ctx.message.delete()  # delete original message
+        await ctx.response.send_message(insult)
+
+    @app_commands.command()
+    async def insultsfw(self, ctx: Interaction, subject: Optional[str] = ""):
+        """Generate and send an sfw insult.
+        """
+
+        # If insult bot is mentioned, send middle finger and return
+        if re.search("<@!?548617277000384532", subject):
+            await ctx.response.send_message("\U0001F595")  # send :middle_finger:
+            return
+
+        log.info(f'Crafting sfw insult from {ctx.user}{f", with subject: {subject}" if subject else ""}')
+
+        insult = self._make_insult(subject, sfw=True)
+
+        # await ctx.message.delete()  # delete original message
+        await ctx.response.send_message(insult)
 
     def _make_insult(self, args, sfw=False):
         """Generate an insult with context
@@ -58,6 +76,7 @@ class Insult(commands.Cog):
             string: content of generated insult, formatted
         """
 
+        args = args.split()
         words = self._read_word_lists()
 
         if sfw:
@@ -105,8 +124,8 @@ class Insult(commands.Cog):
         return (adjectives, curses, nouns)
 
 
-def setup(bot):
+async def setup(bot):
     """Add cog to bot. Called in main.
     """
 
-    bot.add_cog(Insult(bot))
+    await bot.add_cog(Insult(bot))

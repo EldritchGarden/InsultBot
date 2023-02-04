@@ -1,7 +1,0 @@
-{
-    "token": "<discord_api_token>",
-    "default_channel": 0,
-    "prefix": "$",
-    "administrators": [],
-    "log_level": 20
-}

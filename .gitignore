@@ -3,5 +3,6 @@ hate_list.txt
 *.log
 venv
 env
+dev
 insult.service
 *.pickle
